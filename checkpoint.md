@@ -1,9 +1,11 @@
 # Checkpoint do Projeto — TDK & COUTS TCG (Plataforma de Gestão de Leilões)
 
-**Última Atualização:** 19/11/2026 às 12:02 (UTC-3)  
+**Última Atualização:** 19/11/2026 às 19:10 (UTC-3)  
 **Orquestrador:** `@AgenteOrquestrador (Tech Lead)`  
 **Workspace:** `d:\Projetos\TDK-Couts-tcg-app`  
-**Projeto Supabase:** `tdk-card-games` (`project_id`: `lafvgkbxmxwhvgiwnxgp` | URL: `https://lafvgkbxmxwhvgiwnxgp.supabase.co`)
+**Repositório GitHub:** `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`)  
+**Projeto Supabase:** `tdk-card-games` (`project_id`: `lafvgkbxmxwhvgiwnxgp` | URL: `https://lafvgkbxmxwhvgiwnxgp.supabase.co`)  
+**Projeto Netlify:** `tdk-couts-tcg` (`siteId`: `dd321459-4a29-4b98-897f-1b4fb2078375` | Dashboard: `https://app.netlify.com/projects/tdk-couts-tcg`)
 
 ---
 
@@ -66,23 +68,29 @@
 
 ## 2. Em que passo estamos agora?
 
-- **MVP + Funcionalidades da Fase 2 concluídos, compilados e testados com sucesso localmente e no Supabase (`lafvgkbxmxwhvgiwnxgp` + bucket `tcg-uploads`).**
-- **Git & Netlify preparados:** Repositório Git local inicializado na branch `main` com commit inicial, `.gitignore` atualizado (incluindo `.netlify/`) e `netlify.toml` configurado para deploy do Next.js 15.
-- **Servidor Local Ativo:** Servidor Next.js rodando fora do sandbox em `http://localhost:3000` para revisão visual e funcional do Thiago no navegador.
+- **MVP + Fase 2 + Refinos Visuais (Light Mode, marcas d'água laterais Pokémon, Pokébola no header, botões outline) implementados e validados localmente.**
+- **Supabase (`lafvgkbxmxwhvgiwnxgp`) pronto para produção:**
+  - 7 tabelas isoladas `tcg_*` populadas (343 compras = `R$ 4.123,76`) + bucket privado `tcg-uploads`.
+  - Ponte server-side SHA-256 (`supabase/migrations/20261119000002_tcg_backend_bridge.sql`) com `private.tcg_app_secrets` e `private.tcg_current_role()`, alimentada pelo cabeçalho `TCG_BACKEND_SECRET` em `src/lib/db-store.ts` (security advisors sem pendências para o escopo TCG).
+  - Fallback serverless em `/tmp` e catálogo JSON inicial (`src/lib/initial-purchases-fallback.json`) adicionados em `src/lib/db-store.ts` para execução sem disco persistente.
+- **GitHub sincronizado:** Código publicado em `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`).
+- **Netlify configurado e bloqueado por limite de conta:**
+  - Projeto `tdk-couts-tcg` (`siteId`: `dd321459-4a29-4b98-897f-1b4fb2078375`, time `castro-thiagoux`) criado em `https://app.netlify.com/projects/tdk-couts-tcg`.
+  - `netlify.toml` configurado com `[[plugins]] package = "@netlify/plugin-nextjs"` e 4 variáveis de ambiente configuradas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TCG_BACKEND_SECRET`).
+  - O deploy `6aff730afc0047dc9106839e` foi interrompido pelo Netlify com o erro `"Skipped due to account credit usage exceeded"`.
+- **Servidor Local Ativo:** Servidor Next.js disponível fora do sandbox em `http://localhost:3000` para revisão visual e funcional do Thiago no navegador.
 
 ---
 
 ## 3. Próximos Passos
 
-1. **Revisão Visual e Ajustes Finos (UX/UI) com o Thiago em `http://localhost:3000`:**
+1. **Desbloquear Hospedagem em Produção (escolher uma opção):**
+   - **Opção A — Netlify:** Regularizar/adicionar créditos na conta Netlify (`https://app.netlify.com/projects/tdk-couts-tcg`) ou conectar o deploy contínuo ao GitHub após liberar créditos, e disparar novo deploy.
+   - **Opção B — Vercel (Alternativa imediata):** Importar o repositório `https://github.com/thiago-castr0/TDK-Couts-tcg.git` na Vercel e cadastrar as 4 variáveis de ambiente (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TCG_BACKEND_SECRET`).
+2. **Revisão Visual e Funcional em `http://localhost:3000`:**
    - Validar cada tela no navegador: Dashboard, Minhas Compras, Arremates, Contabilidade De-Para, Cobrança WhatsApp, Etiquetas 10-por-folha e Tesouraria.
-   - Implementar eventuais ajustes de interface, novos ícones ou integração de upload real de arquivos no bucket `tcg-uploads` / login via Supabase Auth, se desejado.
-2. **Conectar Escrita Direta no Supabase (`Service Role`):**
-   - Inserir `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` e nas variáveis de ambiente do Netlify para sincronização direta server-side com o PostgreSQL/Storage.
-3. **Conectar GitHub & Deploy Contínuo no Netlify (`arquitetura_de_infraestrutura_ci_cd.md`):**
-   - Receber a URL do repositório GitHub do Thiago, configurar `git remote add origin <URL>` e fazer `git push -u origin main`.
-   - Executar `netlify login` / `netlify init` para conectar ao repositório GitHub e configurar as env vars de produção (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
-4. **Pendência de Segurança Legada no Supabase (Decisão do Thiago):**
+   - Opcionalmente adicionar `SUPABASE_SERVICE_ROLE_KEY` ao `.env.local` e ao provedor de produção, caso deseje escrita direta via Service Role além da ponte `TCG_BACKEND_SECRET`.
+3. **Pendência de Segurança Legada no Supabase (Decisão do Thiago):**
    - Decidir se quer habilitar RLS e criar políticas nas 12 tabelas antigas do e-commerce (`Produto`, `Pedido`, `Usuario`, etc.) no projeto `lafvgkbxmxwhvgiwnxgp`.
 
 ---

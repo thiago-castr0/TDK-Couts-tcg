@@ -134,7 +134,7 @@ function PurchasesHeaderActions({
         <button
           type="button"
           onClick={onDownload}
-          className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:border-purple-700 dark:bg-[#1E1035] dark:hover:bg-purple-900/50"
+          className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-transparent px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-purple-500 hover:text-purple-700 dark:border-purple-700 dark:text-purple-200 dark:hover:border-yellow-400"
         >
           <Download size={15} /> Baixar Modelo (.xlsx)
         </button>
@@ -144,7 +144,7 @@ function PurchasesHeaderActions({
               type="button"
               data-testid="open-upload-purchases"
               onClick={onOpenUpload}
-              className="flex items-center gap-1.5 rounded-md border border-purple-500/60 bg-purple-600/20 px-3 py-2 text-xs font-semibold text-purple-700 hover:bg-purple-600/30 dark:text-purple-200"
+              className="flex items-center gap-1.5 rounded-md border border-purple-500 bg-transparent px-3 py-2 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 dark:border-purple-400 dark:text-purple-200 dark:hover:bg-purple-900/30"
             >
               <Upload size={15} /> Importar Planilha
             </button>
@@ -152,7 +152,7 @@ function PurchasesHeaderActions({
               type="button"
               data-testid="open-create-purchase"
               onClick={onOpenCreate}
-              className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-3.5 py-2 text-xs font-extrabold text-[#130924] shadow-sm transition hover:bg-yellow-300"
+              className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3.5 py-2 text-xs font-extrabold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
             >
               <PikachuIcon size={16} /> Cadastrar Compra
             </button>

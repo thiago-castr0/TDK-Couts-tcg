@@ -1,6 +1,6 @@
 # Checkpoint do Projeto — TDK & COUTS TCG (Plataforma de Gestão de Leilões)
 
-**Última Atualização:** 19/11/2026 às 09:35 (UTC-3)  
+**Última Atualização:** 19/11/2026 às 12:02 (UTC-3)  
 **Orquestrador:** `@AgenteOrquestrador (Tech Lead)`  
 **Workspace:** `d:\Projetos\TDK-Couts-tcg-app`  
 **Projeto Supabase:** `tdk-card-games` (`project_id`: `lafvgkbxmxwhvgiwnxgp` | URL: `https://lafvgkbxmxwhvgiwnxgp.supabase.co`)
@@ -45,9 +45,10 @@
 ### D. Frontend Temático & Ícones Pokémon-Lucide (`@AgenteFrontend` & `@AgenteUXBenchmark`)
 - Ativos copiados de `Documentação inicial/Image/` para `public/brand/` (`tdk-banner.jpeg`, `regras-lances.jpeg`, `foto-carta-leilao.jpeg`, `etiquetas_tdk_couts_tcg_10_por_folha.pdf`).
 - Ícones SVG autorais em padrão Lucide (`24x24`, `strokeWidth={2}`) em `src/components/icons/pokemon-lucide.tsx`: `PikachuIcon`, `PokeballIcon`, `MasterballIcon`, `TcgCardStackIcon`, `TdkCrownIcon`, `ThunderboltIcon`.
-- Interface completa em Next.js 15 + Tailwind CSS com Dark Mode (Roxo Cósmico + Amarelo Pikachu) e Light Mode:
-  - `src/components/HeaderBar.tsx` (navegação + seletor de perfil RBAC + toggle tema)
-  - `src/components/DashboardTab.tsx` (KPIs, gráfico por leilão, alertas PIX e guia de lances)
+- Interface completa em Next.js 15 + Tailwind CSS com **Light Mode como padrão** (suporte a Dark Mode via toggle), **marcas d'água de contorno Pokémon nas laterais** (`src/components/PokemonSideWatermarks.tsx`), **navegação superior limpa** (sem caixa roxa, apenas texto e ícone coloridos quando selecionados), **botões no estilo outline** e emblema/ícones de **Pokébola** (`PokeballIcon`) no lugar da coroa:
+  - `src/components/PokemonSideWatermarks.tsx` (contornos Pikachu, Pokébola, Carta TCG, Eevee e Raio nas laterais)
+  - `src/components/HeaderBar.tsx` (emblema Pokébola outline + navegação limpa + seletor RBAC + toggle tema)
+  - `src/components/DashboardTab.tsx` (banner claro sem barra roxa escura, KPIs, gráfico por leilão, alertas PIX e guia de lances)
   - `src/components/PurchasesTab.tsx`, `PurchasesModal.tsx`, `SpreadsheetUploadModal.tsx`
   - `src/components/SalesTab.tsx`
   - `src/components/AccountingTab.tsx`
@@ -55,10 +56,10 @@
   - `src/components/TreasuryTab.tsx`
 
 ### E. Qualidade e Testes Validados (`@AgenteQA`)
-- `npm run qa:design` (`scripts/enforce-design-system.mjs`): **Passou** — 31 arquivos validados, 100% das funções `<= 100` linhas, `verifyRBAC` em 100% das rotas, Tailwind CSS + Lucide estritos.
+- `npm run qa:design` (`scripts/enforce-design-system.mjs`): **Passou** — 32 arquivos validados, 100% das funções `<= 100` linhas, `verifyRBAC` em 100% das rotas, Tailwind CSS + Lucide estritos.
 - `npx tsc --noEmit`: **Passou** (exit code 0).
 - `npm run build`: **Passou** (Next.js 15.5.29, 13 rotas compiladas).
-- `npx playwright test` (`tests/e2e.spec.ts`): **6 passed (4.7s)** no Chromium real (incluindo Dashboard `R$ 4.123,76`, filtros/cadastro `30,50`, upload resiliente com erro na linha 3 preservando linhas válidas, De-Para, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
+- `npx playwright test` (`tests/e2e.spec.ts`): **6 passed (4.8s)** no Chromium real (incluindo Dashboard `R$ 4.123,76`, filtros/cadastro `30,50`, upload resiliente com erro na linha 3 preservando linhas válidas, De-Para, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
 - Banco local restaurado ao seed limpo após os testes (`node scripts/seed-db.mjs` -> 343 compras = `R$ 4.123,76`).
 
 ---

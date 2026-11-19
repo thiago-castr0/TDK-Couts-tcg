@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Copy, MessageCircle, Printer, Tags, UserPlus, X } from 'lucide-react';
-import { PikachuIcon, PokeballIcon, TdkCrownIcon } from '@/components/icons/pokemon-lucide';
+import { PikachuIcon, PokeballIcon } from '@/components/icons/pokemon-lucide';
 import { apiFetch, type ActiveSession } from '@/lib/client-api';
 
 interface EnrichedCustomer {
@@ -48,7 +48,7 @@ export function CustomersLabelsTab({ session }: { session: ActiveSession }) {
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-extrabold">
-            <TdkCrownIcon size={20} className="text-yellow-400" />
+            <PokeballIcon size={20} className="text-purple-600 dark:text-yellow-400" />
             Clientes, Cobrança WhatsApp &amp; Etiquetas TDK (10/folha)
           </h2>
           <p className="text-xs text-slate-500 dark:text-purple-300">
@@ -60,7 +60,7 @@ export function CustomersLabelsTab({ session }: { session: ActiveSession }) {
             type="button"
             data-testid="toggle-labels-sheet"
             onClick={() => setShowLabelsSheet((v) => !v)}
-            className="flex items-center gap-1.5 rounded-md border border-purple-500/60 bg-purple-600/20 px-3 py-2 text-xs font-bold dark:text-yellow-300"
+            className="flex items-center gap-1.5 rounded-md border border-purple-500 bg-transparent px-3 py-2 text-xs font-bold text-purple-700 transition hover:bg-purple-50 dark:border-purple-400 dark:text-yellow-300 dark:hover:bg-purple-900/30"
           >
             <Tags size={15} /> {showLabelsSheet ? 'Ocultar Folha de Etiquetas' : 'Gerar 10 Etiquetas A4'}
           </button>
@@ -68,7 +68,7 @@ export function CustomersLabelsTab({ session }: { session: ActiveSession }) {
             <button
               type="button"
               onClick={() => setShowNewCustomer(true)}
-              className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-3.5 py-2 text-xs font-extrabold text-[#130924] hover:bg-yellow-300"
+              className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3.5 py-2 text-xs font-extrabold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
             >
               <UserPlus size={15} /> Novo Cliente
             </button>
@@ -155,7 +155,7 @@ function CustomersTable({
                   type="button"
                   data-testid={`whatsapp-summary-${c.id}`}
                   onClick={() => onOpenWhatsApp(c)}
-                  className="flex items-center gap-1.5 rounded-md bg-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-500 hover:bg-emerald-500/30"
+                  className="flex items-center gap-1.5 rounded-md border border-emerald-500 bg-transparent px-3 py-1.5 text-xs font-bold text-emerald-600 transition hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                 >
                   <MessageCircle size={14} /> Gerar Resumo WhatsApp
                 </button>
@@ -205,7 +205,7 @@ function LabelsSheetPreview({
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-3.5 py-1.5 text-xs font-extrabold text-[#130924]"
+            className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3.5 py-1.5 text-xs font-extrabold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
           >
             <Printer size={14} /> Imprimir 10 Etiquetas
           </button>
@@ -275,7 +275,7 @@ function WhatsAppChargeModal({ customer, onClose }: { customer: EnrichedCustomer
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="flex items-center gap-1.5 rounded-md bg-emerald-500 px-3.5 py-1.5 text-xs font-bold text-white"
+            className="flex items-center gap-1.5 rounded-md border-2 border-emerald-500 bg-transparent px-3.5 py-1.5 text-xs font-bold text-emerald-600 transition hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? 'Copiado!' : 'Copiar Mensagem'}
@@ -313,8 +313,8 @@ function NewCustomerModal({ session, onClose, onCreated }: { session: ActiveSess
           <input placeholder="WhatsApp (DDD + número) *" value={telefone} onChange={(e) => setTelefone(e.target.value)} required className="w-full rounded border border-slate-300 bg-transparent px-3 py-2 dark:border-purple-700" />
           <input placeholder="Instagram / Nick (@...)" value={handleSocial} onChange={(e) => setHandleSocial(e.target.value)} className="w-full rounded border border-slate-300 bg-transparent px-3 py-2 dark:border-purple-700" />
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded border px-3 py-1.5 text-xs dark:border-purple-700">Cancelar</button>
-            <button type="submit" className="rounded bg-yellow-400 px-3.5 py-1.5 text-xs font-bold text-[#130924]">Salvar</button>
+            <button type="button" onClick={onClose} className="rounded border border-slate-300 bg-transparent px-3 py-1.5 text-xs dark:border-purple-700">Cancelar</button>
+            <button type="submit" className="rounded border-2 border-purple-600 bg-transparent px-3.5 py-1.5 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10">Salvar</button>
           </div>
         </form>
       </div>

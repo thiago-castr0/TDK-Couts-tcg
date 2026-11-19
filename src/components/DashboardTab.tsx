@@ -6,7 +6,6 @@ import {
   PikachuIcon,
   PokeballIcon,
   TcgCardStackIcon,
-  TdkCrownIcon,
   ThunderboltIcon,
   type TcgIconComponent,
 } from '@/components/icons/pokemon-lucide';
@@ -103,23 +102,26 @@ export function DashboardTab({ session }: { session: ActiveSession }) {
 
 function DashboardHeroBanner() {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-purple-700/40 bg-[#1E1035] p-5 text-white shadow-lg">
-      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white/95 p-5 text-slate-900 shadow-sm dark:border-purple-800/60 dark:bg-[#1E1035]/95 dark:text-white">
+      <div className="pointer-events-none absolute -right-6 -top-6 text-slate-200/60 dark:text-purple-500/10">
+        <PokeballIcon size={130} />
+      </div>
+      <div className="relative flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div className="max-w-xl space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400/20 px-3 py-1 text-xs font-bold text-yellow-300">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-transparent px-3 py-1 text-xs font-bold text-purple-700 dark:border-yellow-400/50 dark:text-yellow-300">
             <ThunderboltIcon size={14} /> Central de Leilões Pokémon TCG
           </div>
           <h2 className="text-xl font-extrabold tracking-tight md:text-2xl">
             Painel Financeiro &amp; Estoque — TDK &amp; COUTS TCG
           </h2>
-          <p className="text-sm text-purple-200">
+          <p className="text-sm text-slate-600 dark:text-purple-200">
             Controle completo de compras, arremates do WhatsApp, conciliação De-Para e repasses em padrão BRL.
           </p>
         </div>
         <img
           src="/brand/tdk-banner.jpeg"
           alt="Banner TDK & COUTS TCG"
-          className="h-24 w-44 rounded-lg border border-yellow-400/50 object-cover shadow-md"
+          className="h-24 w-44 rounded-lg border border-slate-200 object-cover shadow-sm dark:border-yellow-400/50"
         />
       </div>
     </div>
@@ -163,7 +165,7 @@ function AuctionComparisonCard({ auctions }: { auctions: TreasuryDashboardData['
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-purple-800/60 dark:bg-[#1E1035]">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-base font-bold">
-          <TdkCrownIcon size={18} className="text-yellow-400" />
+          <PokeballIcon size={18} className="text-purple-600 dark:text-yellow-400" />
           Arremates vs. Custo por Leilão
         </h3>
         <span className="text-xs text-slate-500 dark:text-purple-300">Atualizado em tempo real</span>

@@ -5,6 +5,7 @@ import { AccountingTab } from '@/components/AccountingTab';
 import { CustomersLabelsTab } from '@/components/CustomersLabelsTab';
 import { DashboardTab } from '@/components/DashboardTab';
 import { HeaderBar, type TabKey } from '@/components/HeaderBar';
+import { PokemonSideWatermarks } from '@/components/PokemonSideWatermarks';
 import { PurchasesTab } from '@/components/PurchasesTab';
 import { SalesTab } from '@/components/SalesTab';
 import { TreasuryTab } from '@/components/TreasuryTab';
@@ -13,7 +14,7 @@ import { INITIAL_SESSION, type ActiveSession } from '@/lib/client-api';
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
   const [session, setSession] = useState<ActiveSession>(INITIAL_SESSION);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
@@ -25,7 +26,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
+      <PokemonSideWatermarks />
       <HeaderBar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -35,7 +37,7 @@ export default function HomePage() {
         onToggleDark={() => setDarkMode((d) => !d)}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 py-6">
         {activeTab === 'dashboard' && <DashboardTab session={session} />}
         {activeTab === 'compras' && <PurchasesTab session={session} />}
         {activeTab === 'vendas' && <SalesTab session={session} />}

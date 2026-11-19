@@ -183,7 +183,7 @@ function SuggestionsSection({
                     type="button"
                     data-testid={`capture-match-${idx}`}
                     onClick={() => onAccept(s)}
-                    className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-3 py-1.5 font-bold text-[#130924] hover:bg-yellow-300"
+                    className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3 py-1.5 font-bold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
                   >
                     <PokeballIcon size={14} /> Capturar Match
                   </button>
@@ -249,7 +249,7 @@ function ManualLinkSection(props: {
       <div className="flex items-end">
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-1.5 rounded-md bg-purple-700 px-3 py-2 text-xs font-bold text-yellow-300 hover:bg-purple-600"
+          className="flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3 py-2 text-xs font-bold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
         >
           <Link2 size={15} /> Vincular Manual / Lote
         </button>

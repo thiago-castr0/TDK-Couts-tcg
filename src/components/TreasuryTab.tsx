@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { TdkCrownIcon } from '@/components/icons/pokemon-lucide';
+import { PokeballIcon } from '@/components/icons/pokemon-lucide';
 import { apiFetch, type ActiveSession } from '@/lib/client-api';
 import type { PartnerTreasurySummary } from '@/lib/skills/accounting-skills';
 
@@ -55,7 +55,7 @@ export function TreasuryTab({ session }: { session: ActiveSession }) {
     <div className="space-y-6">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-extrabold">
-          <TdkCrownIcon size={20} className="text-yellow-400" />
+          <PokeballIcon size={20} className="text-purple-600 dark:text-yellow-400" />
           Tesouraria &amp; Repasses aos Sócios
         </h2>
         <p className="text-xs text-slate-500 dark:text-purple-300">

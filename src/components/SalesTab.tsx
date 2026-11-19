@@ -115,16 +115,16 @@ function SalesHeaderActions({
         <button
           type="button"
           onClick={onDownload}
-          className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold dark:border-purple-700 dark:bg-[#1E1035]"
+          className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-transparent px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-purple-500 hover:text-purple-700 dark:border-purple-700 dark:text-purple-200 dark:hover:border-yellow-400"
         >
           <Download size={15} /> Baixar Modelo (.xlsx)
         </button>
         {canCreate && (
           <>
-            <button type="button" onClick={onOpenUpload} className="flex items-center gap-1.5 rounded-md border border-purple-500/60 bg-purple-600/20 px-3 py-2 text-xs font-semibold">
+            <button type="button" onClick={onOpenUpload} className="flex items-center gap-1.5 rounded-md border border-purple-500 bg-transparent px-3 py-2 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 dark:border-purple-400 dark:text-purple-200 dark:hover:bg-purple-900/30">
               <Upload size={15} /> Importar Planilha
             </button>
-            <button type="button" data-testid="open-create-sale" onClick={onOpenCreate} className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-3.5 py-2 text-xs font-extrabold text-[#130924] hover:bg-yellow-300">
+            <button type="button" data-testid="open-create-sale" onClick={onOpenCreate} className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-3.5 py-2 text-xs font-extrabold text-purple-700 transition hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10">
               <PikachuIcon size={16} /> Novo Arremate
             </button>
           </>
@@ -211,7 +211,7 @@ function SalesTable({ items, onMarkPaid }: { items: SaleRow[]; onMarkPaid: (s: S
                     <button
                       type="button"
                       onClick={() => onMarkPaid(sale)}
-                      className="rounded bg-amber-500/20 px-2.5 py-1 font-bold text-amber-400 hover:bg-amber-500/30"
+                      className="rounded border border-amber-500 bg-transparent px-2.5 py-1 font-bold text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10"
                     >
                       Anexar PIX ({sale.statusPagamento})
                     </button>
@@ -266,8 +266,8 @@ function NewSaleModal({ session, onClose, onCreated }: { session: ActiveSession;
           <input placeholder="Valor Arrematado (ex: 45,00)" value={valorArremateBRL} onChange={(e) => setValorArremateBRL(sanitizeBRLInput(e.target.value))} required className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 dark:border-purple-700" />
           {error && <p className="text-xs text-red-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded-md border px-4 py-2 text-xs dark:border-purple-700">Cancelar</button>
-            <button type="submit" className="flex items-center gap-1.5 rounded-md bg-yellow-400 px-4 py-2 text-xs font-bold text-[#130924]">
+            <button type="button" onClick={onClose} className="rounded-md border border-slate-300 bg-transparent px-4 py-2 text-xs dark:border-purple-700">Cancelar</button>
+            <button type="submit" className="flex items-center gap-1.5 rounded-md border-2 border-purple-600 bg-transparent px-4 py-2 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10">
               <PikachuIcon size={15} /> Salvar Arremate
             </button>
           </div>

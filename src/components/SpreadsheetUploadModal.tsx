@@ -78,7 +78,7 @@ export function SpreadsheetUploadModal({
         {draft && <DraftSummaryAndPreview draft={draft} moduleName={moduleName} />}
 
         <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-4 py-2 text-sm dark:border-purple-700">
+          <button type="button" onClick={onClose} className="rounded-md border border-slate-300 bg-transparent px-4 py-2 text-sm text-slate-700 dark:border-purple-700 dark:text-purple-200">
             Fechar
           </button>
           <button
@@ -86,7 +86,7 @@ export function SpreadsheetUploadModal({
             disabled={!draft || draft.validRows.length === 0 || loading}
             data-testid="confirm-bulk-insert"
             onClick={() => void handleConfirmBulkInsert()}
-            className="flex items-center gap-2 rounded-md bg-yellow-400 px-4 py-2 text-sm font-bold text-[#130924] transition hover:bg-yellow-300 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-md border-2 border-purple-600 bg-transparent px-4 py-2 text-sm font-bold text-purple-700 transition hover:bg-purple-50 disabled:opacity-50 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
           >
             <PokeballIcon size={16} />
             {loading ? 'Processando...' : `Confirmar ${draft?.validRows.length ?? 0} Linha(s) Válida(s)`}

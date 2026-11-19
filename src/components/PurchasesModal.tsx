@@ -131,14 +131,14 @@ function PurchaseModalHeader({ onClose }: { onClose: () => void }) {
 function PurchaseModalFooter({ saving, onClose }: { saving: boolean; onClose: () => void }) {
   return (
     <div className="flex justify-end gap-2 pt-2">
-      <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-4 py-2 text-sm dark:border-purple-700">
+      <button type="button" onClick={onClose} className="rounded-md border border-slate-300 bg-transparent px-4 py-2 text-sm text-slate-700 hover:border-slate-400 dark:border-purple-700 dark:text-purple-200">
         Cancelar
       </button>
       <button
         type="submit"
         disabled={saving}
         data-testid="submit-new-purchase"
-        className="flex items-center gap-2 rounded-md bg-yellow-400 px-4 py-2 text-sm font-bold text-[#130924] transition hover:bg-yellow-300 disabled:opacity-60"
+        className="flex items-center gap-2 rounded-md border-2 border-purple-600 bg-transparent px-4 py-2 text-sm font-bold text-purple-700 transition hover:bg-purple-50 disabled:opacity-60 dark:border-yellow-400 dark:text-yellow-300 dark:hover:bg-yellow-400/10"
       >
         <PikachuIcon size={16} />
         {saving ? 'Salvando...' : 'Salvar Compra'}

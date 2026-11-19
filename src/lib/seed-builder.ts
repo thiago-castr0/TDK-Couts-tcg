@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import initialPurchasesFallback from '@/lib/initial-purchases-fallback.json';
 import { DEFAULT_PROFILES } from '@/lib/rbac';
 import { extractCardNumber } from '@/lib/skills/accounting-skills';
 import { parseExcelToJSON } from '@/lib/skills/excel-skills';
@@ -23,7 +24,9 @@ function detectCondition(descricao: string): Purchase['condicao'] {
 
 function buildSeedPurchases(): Purchase[] {
   const csvPath = path.join(process.cwd(), CSV_RELATIVE_PATH);
-  if (!fs.existsSync(csvPath)) return [];
+  if (!fs.existsSync(csvPath)) {
+    return (initialPurchasesFallback as Purchase[]).map((item) => ({ ...item }));
+  }
 
   const buffer = fs.readFileSync(csvPath);
   const parsed = parseExcelToJSON(buffer, 'Controle de Compras - Pokémon TCG - Página1.csv', 'text/csv', buffer.byteLength, 'compras');

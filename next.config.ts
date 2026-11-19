@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./Documentação inicial/Controle de Compras - Pokémon TCG - Página1.csv'],
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

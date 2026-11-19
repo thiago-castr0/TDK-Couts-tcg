@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buildInitialDatabaseState } from '@/lib/seed-builder';
@@ -11,35 +12,67 @@ import type {
   TcgDatabaseState,
 } from '@/types/tcg';
 
-const DB_FILE_PATH = path.join(process.cwd(), 'data', 'tcg-database.json');
+const LOCAL_DB_PATH = path.join(process.cwd(), 'data', 'tcg-database.json');
+const TMP_DB_PATH = path.join(os.tmpdir(), 'tdk-tcg-database.json');
+let memoryFallbackState: TcgDatabaseState | null = null;
+
+function resolveDbPath(): string {
+  try {
+    const dir = path.dirname(LOCAL_DB_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.accessSync(dir, fs.constants.W_OK);
+    return LOCAL_DB_PATH;
+  } catch {
+    return TMP_DB_PATH;
+  }
+}
 
 function getSupabaseAdminClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) return null;
-  return createClient(url, serviceKey, { auth: { persistSession: false } });
+  if (serviceKey) {
+    return createClient(url, serviceKey, { auth: { persistSession: false } });
+  }
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const backendSecret = process.env.TCG_BACKEND_SECRET;
+  if (!anonKey || !backendSecret) return null;
+  return createClient(url, anonKey, {
+    auth: { persistSession: false },
+    global: { headers: { 'x-tcg-backend-secret': backendSecret } },
+  });
 }
 
 export function readDatabase(): TcgDatabaseState {
-  const dir = path.dirname(DB_FILE_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  const dbPath = resolveDbPath();
+  try {
+    if (!fs.existsSync(dbPath)) {
+      const initial = fs.existsSync(LOCAL_DB_PATH)
+        ? (JSON.parse(fs.readFileSync(LOCAL_DB_PATH, 'utf8')) as TcgDatabaseState)
+        : buildInitialDatabaseState();
+      fs.writeFileSync(dbPath, JSON.stringify(initial, null, 2), 'utf8');
+      memoryFallbackState = initial;
+      return initial;
+    }
+    const parsed = JSON.parse(fs.readFileSync(dbPath, 'utf8')) as TcgDatabaseState;
+    memoryFallbackState = parsed;
+    return parsed;
+  } catch {
+    if (!memoryFallbackState) memoryFallbackState = buildInitialDatabaseState();
+    return memoryFallbackState;
   }
-  if (!fs.existsSync(DB_FILE_PATH)) {
-    const initial = buildInitialDatabaseState();
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(initial, null, 2), 'utf8');
-    return initial;
-  }
-  const raw = fs.readFileSync(DB_FILE_PATH, 'utf8');
-  return JSON.parse(raw) as TcgDatabaseState;
 }
 
 export function writeDatabase(state: TcgDatabaseState): void {
-  const dir = path.dirname(DB_FILE_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  memoryFallbackState = state;
+  const dbPath = resolveDbPath();
+  try {
+    const dir = path.dirname(dbPath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(dbPath, JSON.stringify(state, null, 2), 'utf8');
+  } catch {
+    // Fallback em memória mantém operação em ambientes estritamente read-only
   }
-  fs.writeFileSync(DB_FILE_PATH, JSON.stringify(state, null, 2), 'utf8');
 }
 
 export async function syncPurchasesToSupabase(items: Purchase[]): Promise<void> {

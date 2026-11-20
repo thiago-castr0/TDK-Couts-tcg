@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const result = applyReconciliationLinks(parsed.data.saleId, normalizedLinks);
+  const result = await applyReconciliationLinks(parsed.data.saleId, normalizedLinks);
   if (!result) return NextResponse.json({ error: 'Venda não encontrada.' }, { status: 404 });
 
   return NextResponse.json({

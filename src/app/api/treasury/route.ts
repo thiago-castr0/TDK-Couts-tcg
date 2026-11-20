@@ -76,7 +76,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Dados inválidos para atualizar repasse.' }, { status: 400 });
   }
 
-  const updated = updateAuctionRecord(parsed.data.id, { statusRepasse: parsed.data.statusRepasse });
+  const updated = await updateAuctionRecord(parsed.data.id, { statusRepasse: parsed.data.statusRepasse });
   if (!updated) return NextResponse.json({ error: 'Leilão não encontrado.' }, { status: 404 });
   return NextResponse.json({ item: updated });
 }

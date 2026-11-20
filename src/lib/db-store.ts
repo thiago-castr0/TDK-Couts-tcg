@@ -1,8 +1,15 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buildInitialDatabaseState } from '@/lib/seed-builder';
+import {
+  deletePurchaseFromSupabase,
+  syncAuctionsToSupabase,
+  syncCustomersToSupabase,
+  syncPurchasesToSupabase,
+  syncReconciliationsToSupabase,
+  syncSalesToSupabase,
+} from '@/lib/supabase-sync';
 import type {
   Auction,
   Customer,
@@ -25,22 +32,6 @@ function resolveDbPath(): string {
   } catch {
     return TMP_DB_PATH;
   }
-}
-
-function getSupabaseAdminClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return null;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (serviceKey) {
-    return createClient(url, serviceKey, { auth: { persistSession: false } });
-  }
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const backendSecret = process.env.TCG_BACKEND_SECRET;
-  if (!anonKey || !backendSecret) return null;
-  return createClient(url, anonKey, {
-    auth: { persistSession: false },
-    global: { headers: { 'x-tcg-backend-secret': backendSecret } },
-  });
 }
 
 export function readDatabase(): TcgDatabaseState {
@@ -75,61 +66,6 @@ export function writeDatabase(state: TcgDatabaseState): void {
   }
 }
 
-export async function syncPurchasesToSupabase(items: Purchase[]): Promise<void> {
-  const client = getSupabaseAdminClient();
-  if (!client || items.length === 0) return;
-  try {
-    const payload = items.map((p) => ({
-      id: p.id,
-      user_id: p.userId,
-      vendedor: p.vendedor,
-      descricao: p.descricao,
-      categoria: p.categoria,
-      condicao: p.condicao,
-      colecao_numero: p.colecaoNumero ?? null,
-      valor_compra_centavos: p.valorCompraCentavos,
-      valor_alocado_centavos: p.valorAlocadoCentavos,
-      valor_liga_centavos: p.valorLigaCentavos ?? null,
-      status_pagamento: p.statusPagamento,
-      status_estoque: p.statusEstoque,
-      imagem_url: p.imagemUrl ?? null,
-      data_compra: p.dataCompra,
-    }));
-    await client.from('tcg_purchases').upsert(payload);
-  } catch {
-    // Cache local mantém operação resiliente caso rede/Supabase esteja offline
-  }
-}
-
-export async function syncSalesToSupabase(items: Sale[]): Promise<void> {
-  const client = getSupabaseAdminClient();
-  if (!client || items.length === 0) return;
-  try {
-    const payload = items.map((s) => ({
-      id: s.id,
-      user_id: s.userId,
-      customer_id: s.customerId,
-      comprador_nome: s.compradorNome,
-      comprador_telefone: s.compradorTelefone,
-      auction_id: s.auctionId,
-      leilao_nome: s.leilaoNome,
-      descricao: s.descricao,
-      quantidade: s.quantidade,
-      valor_arremate_centavos: s.valorArremateCentavos,
-      custo_vinculado_centavos: s.custoVinculadoCentavos,
-      lucro_centavos: s.lucroCentavos,
-      status_pagamento: s.statusPagamento,
-      comprovante_pix_url: s.comprovantePixUrl ?? null,
-      status_conciliacao: s.statusConciliacao,
-      imagem_url: s.imagemUrl ?? null,
-      data_venda: s.dataVenda,
-    }));
-    await client.from('tcg_sales').upsert(payload);
-  } catch {
-    // Resiliência local preservada
-  }
-}
-
 export async function insertPurchases(newItems: Purchase[]): Promise<Purchase[]> {
   const db = readDatabase();
   db.purchases = [...newItems, ...db.purchases];
@@ -158,49 +94,59 @@ export async function deletePurchaseRecord(id: string): Promise<boolean> {
   db.purchases = db.purchases.filter((p) => p.id !== id);
   if (db.purchases.length === prevLen) return false;
   writeDatabase(db);
+  await deletePurchaseFromSupabase(id);
   return true;
 }
 
 export async function insertSales(newSales: Sale[]): Promise<Sale[]> {
   const db = readDatabase();
+  const touchedCustomers = new Map<string, Customer>();
+  const touchedAuctions = new Map<string, Auction>();
   for (const sale of newSales) {
-    ensureCustomerAndAuction(db, sale);
+    const { customer, auction } = ensureCustomerAndAuction(db, sale);
+    touchedCustomers.set(customer.id, customer);
+    touchedAuctions.set(auction.id, auction);
   }
   db.sales = [...newSales, ...db.sales];
   writeDatabase(db);
+  await syncCustomersToSupabase([...touchedCustomers.values()]);
+  await syncAuctionsToSupabase([...touchedAuctions.values()]);
   await syncSalesToSupabase(newSales);
   return newSales;
 }
 
-function ensureCustomerAndAuction(db: TcgDatabaseState, sale: Sale): void {
-  const existingCustomer = db.customers.find(
+function ensureCustomerAndAuction(
+  db: TcgDatabaseState,
+  sale: Sale
+): { customer: Customer; auction: Auction } {
+  let resolvedCustomer = db.customers.find(
     (c) => c.id === sale.customerId || c.nome.toLowerCase() === sale.compradorNome.toLowerCase()
   );
-  if (existingCustomer) {
-    sale.customerId = existingCustomer.id;
-    if (!sale.compradorTelefone) sale.compradorTelefone = existingCustomer.telefone;
+  if (resolvedCustomer) {
+    sale.customerId = resolvedCustomer.id;
+    if (!sale.compradorTelefone) sale.compradorTelefone = resolvedCustomer.telefone;
   } else {
     const cusId = `cus-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const createdCustomer: Customer = {
+    resolvedCustomer = {
       id: cusId,
       nome: sale.compradorNome,
       telefone: sale.compradorTelefone || '',
       createdAt: new Date().toISOString(),
     };
-    db.customers.push(createdCustomer);
+    db.customers.push(resolvedCustomer);
     sale.customerId = cusId;
   }
 
-  const existingAuction = db.auctions.find(
+  let resolvedAuction = db.auctions.find(
     (a) => a.id === sale.auctionId || a.nomeLeilao.toLowerCase() === sale.leilaoNome.toLowerCase()
   );
-  if (existingAuction) {
-    sale.auctionId = existingAuction.id;
-    existingAuction.totalArrematadoCentavos += sale.valorArremateCentavos;
+  if (resolvedAuction) {
+    sale.auctionId = resolvedAuction.id;
+    resolvedAuction.totalArrematadoCentavos += sale.valorArremateCentavos;
   } else {
     const aucId = `auc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const owner = db.profiles.find((p) => p.id === sale.userId) ?? db.profiles[0];
-    const newAuction: Auction = {
+    resolvedAuction = {
       id: aucId,
       nomeLeilao: sale.leilaoNome,
       responsavelId: owner.id,
@@ -211,9 +157,11 @@ function ensureCustomerAndAuction(db: TcgDatabaseState, sale: Sale): void {
       statusRepasse: 'Pendente',
       createdAt: new Date().toISOString(),
     };
-    db.auctions.push(newAuction);
+    db.auctions.push(resolvedAuction);
     sale.auctionId = aucId;
   }
+
+  return { customer: resolvedCustomer, auction: resolvedAuction };
 }
 
 export async function updateSaleRecord(
@@ -230,15 +178,16 @@ export async function updateSaleRecord(
   return updated;
 }
 
-export function applyReconciliationLinks(
+export async function applyReconciliationLinks(
   saleId: string,
   links: Array<{ purchaseId: string; custoAlocadoCentavos: number; tipoMatch: Reconciliation['tipoMatch']; score?: number }>
-): { sale: Sale; reconciliations: Reconciliation[] } | null {
+): Promise<{ sale: Sale; reconciliations: Reconciliation[] } | null> {
   const db = readDatabase();
   const saleIdx = db.sales.findIndex((s) => s.id === saleId);
   if (saleIdx === -1) return null;
 
   const created: Reconciliation[] = [];
+  const updatedPurchases = new Map<string, Purchase>();
   let addedCost = 0;
 
   for (const link of links) {
@@ -249,6 +198,7 @@ export function applyReconciliationLinks(
     purchase.valorAlocadoCentavos += cost;
     purchase.statusEstoque =
       purchase.valorAlocadoCentavos >= purchase.valorCompraCentavos ? 'Vendido' : 'Parcial';
+    updatedPurchases.set(purchase.id, purchase);
     addedCost += cost;
     const rec: Reconciliation = {
       id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -268,10 +218,17 @@ export function applyReconciliationLinks(
   sale.lucroCentavos = sale.valorArremateCentavos - sale.custoVinculadoCentavos;
   sale.statusConciliacao = 'Conciliado';
   writeDatabase(db);
+
+  await syncPurchasesToSupabase([...updatedPurchases.values()]);
+  await syncSalesToSupabase([sale]);
+  await syncReconciliationsToSupabase(created);
+
   return { sale, reconciliations: created };
 }
 
-export function insertCustomerRecord(customer: Omit<Customer, 'id' | 'createdAt'>): Customer {
+export async function insertCustomerRecord(
+  customer: Omit<Customer, 'id' | 'createdAt'>
+): Promise<Customer> {
   const db = readDatabase();
   const created: Customer = {
     ...customer,
@@ -280,14 +237,19 @@ export function insertCustomerRecord(customer: Omit<Customer, 'id' | 'createdAt'
   };
   db.customers.unshift(created);
   writeDatabase(db);
+  await syncCustomersToSupabase([created]);
   return created;
 }
 
-export function updateAuctionRecord(id: string, patch: Partial<Auction>): Auction | null {
+export async function updateAuctionRecord(
+  id: string,
+  patch: Partial<Auction>
+): Promise<Auction | null> {
   const db = readDatabase();
   const idx = db.auctions.findIndex((a) => a.id === id);
   if (idx === -1) return null;
   db.auctions[idx] = { ...db.auctions[idx], ...patch };
   writeDatabase(db);
+  await syncAuctionsToSupabase([db.auctions[idx]]);
   return db.auctions[idx];
 }

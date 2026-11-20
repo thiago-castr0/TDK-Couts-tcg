@@ -74,6 +74,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }, { status: 400 });
   }
 
-  const created = insertCustomerRecord(parsed.data);
+  const created = await insertCustomerRecord(parsed.data);
   return NextResponse.json({ item: created }, { status: 201 });
 }

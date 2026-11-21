@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { formatCentavosToBRL } from '@/lib/currency-brl';
-import { readDatabase, updateAuctionRecord } from '@/lib/db-store';
+import { ensureHydratedDatabase, updateAuctionRecord } from '@/lib/db-store';
 import { verifyRBAC } from '@/lib/rbac';
 import { calculateTreasuryPayouts } from '@/lib/skills/accounting-skills';
 
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const rbac = verifyRBAC(request, ['ADMIN', 'PARTNER', 'TREASURER']);
   if (!rbac.ok) return rbac.response;
 
-  const db = readDatabase();
+  const db = await ensureHydratedDatabase();
   const partnerSummaries = calculateTreasuryPayouts(db.auctions, db.sales, db.profiles);
 
   const auctions = db.auctions.map((auc) => {

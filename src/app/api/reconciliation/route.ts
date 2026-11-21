@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { formatCentavosToBRL, parseBRLToCentavos } from '@/lib/currency-brl';
-import { applyReconciliationLinks, readDatabase } from '@/lib/db-store';
+import { applyReconciliationLinks, ensureHydratedDatabase } from '@/lib/db-store';
 import { verifyRBAC } from '@/lib/rbac';
 import { crossReferenceAccounting } from '@/lib/skills/accounting-skills';
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const rbac = verifyRBAC(request, ['ADMIN', 'PARTNER', 'TREASURER']);
   if (!rbac.ok) return rbac.response;
 
-  const db = readDatabase();
+  const db = await ensureHydratedDatabase();
   const suggestions = crossReferenceAccounting(db.purchases, db.sales);
 
   const reconciledSales = db.sales

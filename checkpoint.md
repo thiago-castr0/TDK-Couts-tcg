@@ -1,6 +1,6 @@
 # Checkpoint do Projeto — TDK & COUTS TCG (Plataforma de Gestão de Leilões)
 
-**Última Atualização:** 20/11/2026 às 18:55 (UTC-3)  
+**Última Atualização:** 21/11/2026 às 20:03 (UTC-3)  
 **Orquestrador:** `@AgenteOrquestrador (Tech Lead)`  
 **Workspace:** `d:\Projetos\TDK-Couts-tcg-app`  
 **Repositório GitHub:** `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`)  
@@ -40,8 +40,9 @@
 - `src/lib/skills/accounting-skills.ts`: Sugestões de match De-Para por similaridade (`crossReferenceAccounting`), vínculo N:N (Lotes e Kits) e consolidado da Tesouraria (`calculateTreasuryPayouts`).
 - `src/lib/skills/bidding-skills.ts`: Regras de "Padronização de Lances TDK & COUTS TCG" baseadas no valor da Liga Pokémon.
 - `src/lib/pokemon-catalog.ts`: Autocomplete Pokémon TCG com catálogo local + consulta à API `pokemontcg.io`.
-- `src/lib/supabase-sync.ts`: Módulo dedicado de sincronização completa das 7 tabelas `tcg_*` (`tcg_customers`, `tcg_auctions`, `tcg_purchases`, `tcg_sales`, `tcg_reconciliations`, `tcg_upload_logs`) e upload real das planilhas enviadas para o bucket privado `tcg-uploads` via `SUPABASE_SERVICE_ROLE_KEY` ou ponte `TCG_BACKEND_SECRET`.
-- `src/lib/db-store.ts`: Camada de persistência híbrida (orquestra cache local / `/tmp` + sincronização assíncrona via `supabase-sync.ts` em criações, edições, conciliações De-Para, leilões, clientes e deleções).
+- `src/lib/supabase-sync.ts`: Módulo dedicado de persistência bidirecional nas 7 tabelas `tcg_*` (`fetchDatabaseFromSupabase` para hidratação no cold-start + sincronização de `tcg_customers`, `tcg_auctions`, `tcg_purchases`, `tcg_sales`, `tcg_reconciliations`, `tcg_upload_logs` e upload real para o bucket privado `tcg-uploads`).
+- `src/lib/db-store.ts`: Camada de persistência híbrida (`ensureHydratedDatabase` hidratando do Supabase no cold-start em todas as rotas `GET` + cache local / `/tmp` + sincronização assíncrona via `supabase-sync.ts`).
+- `DEPLOY.md`: Guia rápido de publicação na Vercel (opção imediata via GitHub) e retomada no Netlify.
 - **9 rotas de API** em `src/app/api/`, todas protegidas por `verifyRBAC`:
   - `/api/purchases`, `/api/sales`, `/api/reconciliation`, `/api/customers`, `/api/treasury`, `/api/spreadsheets/template`, `/api/spreadsheets/parse`, `/api/pokemon-tcg/search`, `/api/auth/session`.
 
@@ -58,21 +59,21 @@
   - `src/components/CustomersLabelsTab.tsx` (Resumo WhatsApp + Folha A4 com 10 Etiquetas TDK & COUTS TCG)
   - `src/components/TreasuryTab.tsx`
 
-### E. Qualidade e Testes Validados (`@AgenteQA` — 20/11/2026)
+### E. Qualidade e Testes Validados (`@AgenteQA` — 21/11/2026)
 - `npm run qa:design` (`scripts/enforce-design-system.mjs`): **Passou** — 33 arquivos validados, 100% das funções `<= 100` linhas, `verifyRBAC` em 100% das rotas, Tailwind CSS + Lucide estritos.
 - `npx tsc --noEmit`: **Passou** (exit code 0).
 - `npm run build`: **Passou** (Next.js 15.5.29, 13 rotas compiladas).
-- `npx playwright test` (`tests/e2e.spec.ts`): **6 passed (6.8s)** no Chromium real (incluindo Dashboard `R$ 4.123,76`, filtros/cadastro `30,50`, upload resiliente com gravação real no bucket `tcg-uploads` e `tcg_upload_logs`, conciliação De-Para em `tcg_reconciliations`, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
+- `npx playwright test` (`tests/e2e.spec.ts`): **6 passed (5.9s)** no Chromium real com hidratação cold-start ativa do Supabase (Dashboard `R$ 4.123,76`, filtros/cadastro `30,50`, upload resiliente com gravação real no bucket `tcg-uploads` e `tcg_upload_logs`, conciliação De-Para em `tcg_reconciliations`, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
 - Bancos local e remoto higienizados após os testes (`node scripts/seed-db.mjs` + verificação Supabase -> 343 compras = `412376` centavos / `R$ 4.123,76`).
 
 ---
 
 ## 2. Em que passo estamos agora?
 
-- **MVP + Fase 2 + Refinos Visuais + Integração Completa com Supabase (7 tabelas `tcg_*` + Storage `tcg-uploads`) implementados, compilados e revalidados em 20/11/2026.**
+- **MVP + Fase 2 + Refinos Visuais + Persistência Bidirecional Supabase (hidratação cold-start + escrita nas 7 tabelas `tcg_*` e bucket `tcg-uploads`) + Guia `DEPLOY.md` implementados, compilados e revalidados em 21/11/2026.**
 - **Supabase (`lafvgkbxmxwhvgiwnxgp`) pronto para produção:**
   - 7 tabelas isoladas `tcg_*` populadas (343 compras = `R$ 4.123,76`) + bucket privado `tcg-uploads`.
-  - Módulo `src/lib/supabase-sync.ts` integrado às rotas de API e `db-store.ts`, alimentado pela ponte server-side SHA-256 (`supabase/migrations/20261119000002_tcg_backend_bridge.sql`, `private.tcg_app_secrets`, `private.tcg_current_role()`, cabeçalho `TCG_BACKEND_SECRET`).
+  - Módulo `src/lib/supabase-sync.ts` (`fetchDatabaseFromSupabase` + `sync*ToSupabase` + `recordSpreadsheetUploadToSupabase`) conectado a `ensureHydratedDatabase()` e às rotas de API via ponte SHA-256 (`supabase/migrations/20261119000002_tcg_backend_bridge.sql`).
   - Fallback serverless em `/tmp` e catálogo JSON inicial (`src/lib/initial-purchases-fallback.json`) ativos em `src/lib/db-store.ts` para execução sem disco persistente.
 - **GitHub sincronizado:** Código publicado em `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`).
 - **Netlify configurado e bloqueado por limite de conta:**

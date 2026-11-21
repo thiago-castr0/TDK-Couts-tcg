@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { formatCentavosToBRL, parseBRLToCentavos } from '@/lib/currency-brl';
-import { insertSales, readDatabase, updateSaleRecord } from '@/lib/db-store';
+import { ensureHydratedDatabase, insertSales, updateSaleRecord } from '@/lib/db-store';
 import { canEditProductDescriptions, verifyRBAC } from '@/lib/rbac';
 import type { Sale } from '@/types/tcg';
 
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   const leilao = (searchParams.get('leilao') ?? '').trim();
   const statusPagamento = (searchParams.get('statusPagamento') ?? '').trim();
 
-  const db = readDatabase();
+  const db = await ensureHydratedDatabase();
   const filtered = db.sales.filter((s) => {
     if (q && !s.descricao.toLowerCase().includes(q) && !s.compradorNome.toLowerCase().includes(q)) return false;
     if (leilao && leilao !== 'ALL' && s.leilaoNome !== leilao) return false;

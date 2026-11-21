@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { formatCentavosToBRL } from '@/lib/currency-brl';
-import { insertCustomerRecord, readDatabase } from '@/lib/db-store';
+import { ensureHydratedDatabase, insertCustomerRecord } from '@/lib/db-store';
 import { verifyRBAC } from '@/lib/rbac';
 
 const createCustomerSchema = z.object({
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const rbac = verifyRBAC(request, ['ADMIN', 'PARTNER', 'TREASURER']);
   if (!rbac.ok) return rbac.response;
 
-  const db = readDatabase();
+  const db = await ensureHydratedDatabase();
   const pixKey = db.profiles[0]?.pixKey || 'pix@tdkcoutstcg.com.br';
 
   const enriched = db.customers.map((customer) => {

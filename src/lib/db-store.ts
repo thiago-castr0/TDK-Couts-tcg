@@ -4,6 +4,7 @@ import path from 'node:path';
 import { buildInitialDatabaseState } from '@/lib/seed-builder';
 import {
   deletePurchaseFromSupabase,
+  fetchDatabaseFromSupabase,
   syncAuctionsToSupabase,
   syncCustomersToSupabase,
   syncPurchasesToSupabase,
@@ -64,6 +65,27 @@ export function writeDatabase(state: TcgDatabaseState): void {
   } catch {
     // Fallback em memória mantém operação em ambientes estritamente read-only
   }
+}
+
+let hydratedFromSupabase = false;
+let hydrationPromise: Promise<void> | null = null;
+
+export async function ensureHydratedDatabase(): Promise<TcgDatabaseState> {
+  if (!hydratedFromSupabase) {
+    if (!hydrationPromise) {
+      hydrationPromise = (async () => {
+        try {
+          const remote = await fetchDatabaseFromSupabase();
+          if (remote && remote.purchases.length > 0) writeDatabase(remote);
+        } finally {
+          hydratedFromSupabase = true;
+          hydrationPromise = null;
+        }
+      })();
+    }
+    await hydrationPromise;
+  }
+  return readDatabase();
 }
 
 export async function insertPurchases(newItems: Purchase[]): Promise<Purchase[]> {

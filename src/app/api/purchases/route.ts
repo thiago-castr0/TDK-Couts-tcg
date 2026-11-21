@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { formatCentavosToBRL, parseBRLToCentavos } from '@/lib/currency-brl';
 import {
   deletePurchaseRecord,
+  ensureHydratedDatabase,
   insertPurchases,
-  readDatabase,
   updatePurchaseRecord,
 } from '@/lib/db-store';
 import { canEditProductDescriptions, verifyRBAC } from '@/lib/rbac';
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
   const limit = Math.min(500, Math.max(1, Number(searchParams.get('limit') ?? '50')));
 
-  const db = readDatabase();
+  const db = await ensureHydratedDatabase();
   const grandTotalCentavos = db.purchases.reduce((acc, p) => acc + p.valorCompraCentavos, 0);
   const vendedores = Array.from(new Set(db.purchases.map((p) => p.vendedor))).sort((a, b) => a.localeCompare(b));
 

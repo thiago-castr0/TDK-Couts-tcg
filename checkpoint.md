@@ -1,11 +1,12 @@
 # Checkpoint do Projeto — TDK & COUTS TCG (Plataforma de Gestão de Leilões)
 
-**Última Atualização:** 21/11/2026 às 20:03 (UTC-3)  
+**Última Atualização:** 27/11/2026 às 13:25 (UTC-3)  
 **Orquestrador:** `@AgenteOrquestrador (Tech Lead)`  
 **Workspace:** `d:\Projetos\TDK-Couts-tcg-app`  
 **Repositório GitHub:** `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`)  
+**Produção Online (Vercel):** `https://tdk-couts-tcg.vercel.app` (`projectId`: `prj_CFFTYQVqfnkcj2RR8SWAUepcmdLP` | time `thiiago-cc-s-projects`)  
 **Projeto Supabase:** `tdk-card-games` (`project_id`: `lafvgkbxmxwhvgiwnxgp` | URL: `https://lafvgkbxmxwhvgiwnxgp.supabase.co`)  
-**Projeto Netlify:** `tdk-couts-tcg` (`siteId`: `dd321459-4a29-4b98-897f-1b4fb2078375` | Dashboard: `https://app.netlify.com/projects/tdk-couts-tcg`)
+**Projeto Netlify (alternativo):** `tdk-couts-tcg` (`siteId`: `dd321459-4a29-4b98-897f-1b4fb2078375` | Dashboard: `https://app.netlify.com/projects/tdk-couts-tcg`)
 
 ---
 
@@ -70,29 +71,28 @@
 
 ## 2. Em que passo estamos agora?
 
-- **MVP + Fase 2 + Refinos Visuais + Persistência Bidirecional Supabase (hidratação cold-start + escrita nas 7 tabelas `tcg_*` e bucket `tcg-uploads`) + Guia `DEPLOY.md` implementados, compilados e revalidados em 21/11/2026.**
-- **Supabase (`lafvgkbxmxwhvgiwnxgp`) pronto para produção:**
+- **MVP + Fase 2 + Refinos Visuais + Persistência Bidirecional Supabase ONLINE EM PRODUÇÃO na Vercel (`27/11/2026`).**
+- **Produção Vercel (`https://tdk-couts-tcg.vercel.app`):**
+  - Projeto `tdk-couts-tcg` (`prj_CFFTYQVqfnkcj2RR8SWAUepcmdLP`, time `thiiago-cc-s-projects`) vinculado ao GitHub `thiago-castr0/TDK-Couts-tcg` (`main`) com deploy contínuo ativo.
+  - 4 variáveis de ambiente configuradas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TCG_BACKEND_SECRET`).
+  - Deploy `dpl_DjWtKpcNMksQbDRDRNS94TLxXiX4` (`READY`, build em 43s) verificado em produção: `GET /` retornando HTTP `200`, `GET /api/purchases` sem credenciais retornando HTTP `401` (RBAC ativo) e `GET /api/purchases?limit=1` autenticado hidratando **343 compras = `R$ 4.123,76`** diretamente do Supabase.
+- **Supabase (`lafvgkbxmxwhvgiwnxgp`) em produção:**
   - 7 tabelas isoladas `tcg_*` populadas (343 compras = `R$ 4.123,76`) + bucket privado `tcg-uploads`.
   - Módulo `src/lib/supabase-sync.ts` (`fetchDatabaseFromSupabase` + `sync*ToSupabase` + `recordSpreadsheetUploadToSupabase`) conectado a `ensureHydratedDatabase()` e às rotas de API via ponte SHA-256 (`supabase/migrations/20261119000002_tcg_backend_bridge.sql`).
-  - Fallback serverless em `/tmp` e catálogo JSON inicial (`src/lib/initial-purchases-fallback.json`) ativos em `src/lib/db-store.ts` para execução sem disco persistente.
 - **GitHub sincronizado:** Código publicado em `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`).
-- **Netlify configurado e bloqueado por limite de conta:**
-  - Projeto `tdk-couts-tcg` (`siteId`: `dd321459-4a29-4b98-897f-1b4fb2078375`, time `castro-thiagoux`) criado em `https://app.netlify.com/projects/tdk-couts-tcg`.
-  - `netlify.toml` configurado com `[[plugins]] package = "@netlify/plugin-nextjs"` e 4 variáveis de ambiente configuradas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TCG_BACKEND_SECRET`).
-  - O deploy `6aff730afc0047dc9106839e` foi interrompido pelo Netlify com o erro `"Skipped due to account credit usage exceeded"`.
-- **Servidor Local Ativo:** Servidor Next.js disponível fora do sandbox em `http://localhost:3000` para revisão visual e funcional do Thiago no navegador.
+- **Netlify (alternativo mantido em standby):** Projeto `tdk-couts-tcg` (`dd321459-4a29-4b98-897f-1b4fb2078375`) permanece pausado pelo limite de créditos da conta `castro-thiagoux`.
 
 ---
 
-## 3. Próximos Passos
+## 3. Próximos Passos (Pós-Lançamento do MVP)
 
-1. **Desbloquear Hospedagem em Produção (escolher uma opção):**
-   - **Opção A — Netlify:** Regularizar/adicionar créditos na conta Netlify (`https://app.netlify.com/projects/tdk-couts-tcg`) ou conectar o deploy contínuo ao GitHub após liberar créditos, e disparar novo deploy.
-   - **Opção B — Vercel (Alternativa imediata):** Importar o repositório `https://github.com/thiago-castr0/TDK-Couts-tcg.git` na Vercel e cadastrar as 4 variáveis de ambiente (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TCG_BACKEND_SECRET`).
-2. **Revisão Visual e Funcional em `http://localhost:3000`:**
-   - Validar cada tela no navegador: Dashboard, Minhas Compras, Arremates, Contabilidade De-Para, Cobrança WhatsApp, Etiquetas 10-por-folha e Tesouraria.
-   - Opcionalmente adicionar `SUPABASE_SERVICE_ROLE_KEY` ao `.env.local` e ao provedor de produção, caso deseje escrita direta via Service Role além da ponte `TCG_BACKEND_SECRET`.
-3. **Pendência de Segurança Legada no Supabase (Decisão do Thiago):**
+1. **Validação Real em Produção (`https://tdk-couts-tcg.vercel.app`):**
+   - Navegar por todas as abas online (Dashboard, Minhas Compras, Arremates, Contabilidade De-Para, Cobrança WhatsApp, Etiquetas 10-por-folha e Tesouraria) com Thiago e Gabriele.
+2. **Autenticação Real com E-mail/Senha (Supabase Auth — Recomendado para Produção):**
+   - Substituir/proteger o seletor rápido de perfil RBAC por tela de login real (`ADMIN`, `PARTNER`, `TREASURER`) vinculada ao Supabase Auth.
+3. **Domínio Customizado (Opcional):**
+   - Caso queira um domínio próprio (ex.: `leiloes.tdkcoutstcg.com.br`), adicionar no projeto `tdk-couts-tcg` da Vercel.
+4. **Pendência de Segurança Legada no Supabase (Decisão do Thiago):**
    - Decidir se quer habilitar RLS e criar políticas nas 12 tabelas antigas do e-commerce (`Produto`, `Pedido`, `Usuario`, etc.) no projeto `lafvgkbxmxwhvgiwnxgp`.
 
 ---

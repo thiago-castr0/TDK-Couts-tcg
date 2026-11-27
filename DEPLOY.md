@@ -17,16 +17,19 @@ A aplicação opera com persistência bidirecional resiliente, compatível tanto
 
 ---
 
-## 2. Opção A — Publicação Rápida na Vercel (Recomendada no Momento)
+## 2. Produção Ativa na Vercel (Deploy Contínuo via GitHub)
 
-1. Acesse **Vercel -> Add New Project** e importe o repositório `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`, framework preset **Next.js**).
-2. Em **Environment Variables**, cadastre as **4 variáveis abaixo** copiando exatamente os valores do seu `.env.local` (nunca versione `.env.local` no Git):
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `TCG_BACKEND_SECRET`
-   - *(Opcional)* `SUPABASE_SERVICE_ROLE_KEY` — caso deseje escrita direta com privilégio Service Role em vez da ponte `TCG_BACKEND_SECRET`.
-3. Clique em **Deploy**. O build gera as rotas App Router (`/`, `/api/*`) e conecta automaticamente ao banco e Storage no Supabase.
+O projeto já está **publicado e online na Vercel** com deploy automático a cada push na branch `main`:
+
+- **URL de Produção:** `https://tdk-couts-tcg.vercel.app`
+- **Project ID:** `prj_CFFTYQVqfnkcj2RR8SWAUepcmdLP` (time `thiiago-cc-s-projects` / `team_EBlp3TCbvOBxI8enXDJ8CTKI`)
+- **Repositório conectado:** `thiago-castr0/TDK-Couts-tcg` (`main`, framework `nextjs`)
+- **Variáveis de Ambiente já configuradas** (`production`, `preview`, `development`):
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  - `TCG_BACKEND_SECRET` (encrypted)
+  - *(Opcional)* `SUPABASE_SERVICE_ROLE_KEY` — caso deseje escrita direta com privilégio Service Role em vez da ponte `TCG_BACKEND_SECRET`.
 
 ---
 

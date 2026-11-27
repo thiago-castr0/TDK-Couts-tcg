@@ -8,7 +8,7 @@ export interface ActiveSession {
 
 export const INITIAL_SESSION: ActiveSession = {
   userId: 'usr-thiago-admin',
-  nome: 'Thiago Couto',
+  nome: 'Thiago',
   role: 'ADMIN',
 };
 
@@ -24,7 +24,7 @@ export async function apiFetch<T>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, { credentials: 'same-origin', ...options, headers });
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(body.error ?? `Erro HTTP ${res.status}`);

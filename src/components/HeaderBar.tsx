@@ -3,6 +3,7 @@
 import {
   FileSpreadsheet,
   LayoutDashboard,
+  LogOut,
   Moon,
   ShieldCheck,
   Sun,
@@ -16,7 +17,7 @@ import {
   type TcgIconComponent,
 } from '@/components/icons/pokemon-lucide';
 import type { ActiveSession } from '@/lib/client-api';
-import { DEFAULT_PROFILES } from '@/lib/rbac';
+import { ROLE_LABELS } from '@/lib/users';
 
 export type TabKey =
   | 'dashboard'
@@ -30,7 +31,7 @@ interface HeaderBarProps {
   activeTab: TabKey;
   onTabChange: (tab: TabKey) => void;
   session: ActiveSession;
-  onSessionChange: (next: ActiveSession) => void;
+  onLogout: () => void;
   darkMode: boolean;
   onToggleDark: () => void;
 }
@@ -48,7 +49,7 @@ export function HeaderBar({
   activeTab,
   onTabChange,
   session,
-  onSessionChange,
+  onLogout,
   darkMode,
   onToggleDark,
 }: HeaderBarProps) {
@@ -70,32 +71,33 @@ export function HeaderBar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-transparent px-2.5 py-1.5 text-xs dark:border-purple-700/70">
+          <div
+            data-testid="active-user-badge"
+            className="flex items-center gap-2 rounded-md border border-slate-300 bg-transparent px-3 py-1.5 text-xs dark:border-purple-700/70"
+          >
             {session.role === 'ADMIN' ? (
               <MasterballIcon size={16} className="text-purple-600 dark:text-yellow-400" />
+            ) : session.role === 'PARTNER' ? (
+              <PokeballIcon size={16} className="text-purple-600 dark:text-yellow-400" />
             ) : (
-              <ShieldCheck size={16} className="text-emerald-500" />
+              <ShieldCheck size={16} className="text-emerald-600 dark:text-emerald-400" />
             )}
-            <label htmlFor="rbac-profile-select" className="sr-only">
-              Perfil de Acesso RBAC
-            </label>
-            <select
-              id="rbac-profile-select"
-              data-testid="rbac-profile-select"
-              value={session.userId}
-              onChange={(e) => {
-                const found = DEFAULT_PROFILES.find((p) => p.id === e.target.value);
-                if (found) onSessionChange({ userId: found.id, nome: found.nome, role: found.role });
-              }}
-              className="bg-transparent font-medium text-slate-800 outline-none dark:text-slate-100"
-            >
-              {DEFAULT_PROFILES.map((p) => (
-                <option key={p.id} value={p.id} className="dark:bg-[#1E1035]">
-                  {p.nome} ({p.role})
-                </option>
-              ))}
-            </select>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{session.nome}</span>
+            <span className="text-slate-400">·</span>
+            <span className="font-medium text-slate-500 dark:text-purple-300">
+              {ROLE_LABELS[session.role]}
+            </span>
           </div>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            data-testid="logout-button"
+            className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-red-400 hover:text-red-600 dark:border-purple-700/70 dark:text-slate-200 dark:hover:border-red-400 dark:hover:text-red-400"
+          >
+            <LogOut size={14} />
+            <span>Sair</span>
+          </button>
 
           <button
             type="button"

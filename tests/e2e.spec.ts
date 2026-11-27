@@ -1,10 +1,45 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+async function loginAs(page: Page, userId: string, password = 'admin123') {
+  await page.goto('/');
+  await page.getByTestId(`login-user-${userId}`).click();
+  await page.getByTestId('login-password-input').fill(password);
+  await page.getByTestId('login-submit-btn').click();
+  await expect(page.getByTestId('active-user-badge')).toBeVisible();
+}
 
 test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
-  test('1. Dashboard e Minhas Compras exibem total real R$ 4.123,76 com vírgula', async ({ page }) => {
+  test('0. Tela de Login exige senha admin123 para Thiago, Gabrielle e Andressa', async ({ page }) => {
     await page.goto('/');
+    await expect(page.getByTestId('login-user-usr-thiago-admin')).toContainText('Thiago');
+    await expect(page.getByTestId('login-user-usr-gabriele-partner')).toContainText('Gabrielle');
+    await expect(page.getByTestId('login-user-usr-andressa-treasurer')).toContainText('Andressa');
+
+    await page.getByTestId('login-user-usr-gabriele-partner').click();
+    await page.getByTestId('login-password-input').fill('senha-errada');
+    await page.getByTestId('login-submit-btn').click();
+    await expect(page.getByTestId('login-error')).toContainText('incorretos');
+
+    await page.getByTestId('login-password-input').fill('admin123');
+    await page.getByTestId('login-submit-btn').click();
+    await expect(page.getByTestId('active-user-badge')).toContainText('Gabrielle');
+
+    await page.reload();
+    await expect(page.getByTestId('active-user-badge')).toContainText('Gabrielle');
+
+    await page.getByTestId('logout-button').click();
+    await expect(page.getByTestId('login-submit-btn')).toBeVisible();
+
+    await page.getByTestId('login-user-usr-andressa-treasurer').click();
+    await page.getByTestId('login-password-input').fill('admin123');
+    await page.getByTestId('login-submit-btn').click();
+    await expect(page.getByTestId('active-user-badge')).toContainText('Andressa');
+  });
+
+  test('1. Dashboard e Minhas Compras exibem total real R$ 4.123,76 com vírgula', async ({ page }) => {
+    await loginAs(page, 'usr-thiago-admin');
     await expect(page.getByTestId('kpi-total-investido')).toContainText('R$ 4.123,76');
 
     await page.getByTestId('nav-tab-compras').click();
@@ -13,7 +48,7 @@ test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
   });
 
   test('2. Filtros em Minhas Compras e cadastro manual com PikachuIcon em BRL (30,50)', async ({ page }) => {
-    await page.goto('/');
+    await loginAs(page, 'usr-thiago-admin');
     await page.getByTestId('nav-tab-compras').click();
 
     await page.getByTestId('search-purchases-input').fill('Pikachu');
@@ -47,7 +82,7 @@ test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
       'utf8'
     );
 
-    await page.goto('/');
+    await loginAs(page, 'usr-thiago-admin');
     await page.getByTestId('nav-tab-compras').click();
     await page.getByTestId('open-upload-purchases').click();
 
@@ -64,7 +99,7 @@ test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
   });
 
   test('4. Contabilidade De-Para: Capturar Match e calcular lucro em BRL', async ({ page }) => {
-    await page.goto('/');
+    await loginAs(page, 'usr-thiago-admin');
     await page.getByTestId('nav-tab-contabilidade').click();
 
     const captureBtn = page.getByTestId('capture-match-0');
@@ -75,7 +110,7 @@ test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
   });
 
   test('5. Clientes: Resumo WhatsApp e Gerador de 10 Etiquetas TDK & COUTS', async ({ page }) => {
-    await page.goto('/');
+    await loginAs(page, 'usr-thiago-admin');
     await page.getByTestId('nav-tab-clientes').click();
 
     await page.getByTestId('whatsapp-summary-cus-001').click();
@@ -89,13 +124,13 @@ test.describe('TDK & COUTS TCG - Suíte E2E & Harness QA', () => {
     await expect(page.getByTestId('label-slot-9')).toBeVisible();
   });
 
-  test('6. Segurança RBAC: 401 sem autenticação e 403 para Tesoureiro alterando produto', async ({ request }) => {
+  test('6. Segurança RBAC: 401 sem autenticação e 403 para Andressa (Tesouraria) alterando produto', async ({ request }) => {
     const unauthRes = await request.get('/api/purchases');
     expect(unauthRes.status()).toBe(401);
 
     const treasurerPatch = await request.patch('/api/purchases', {
       headers: {
-        'x-tcg-user-id': 'usr-marina-treasurer',
+        'x-tcg-user-id': 'usr-andressa-treasurer',
         'x-tcg-role': 'TREASURER',
       },
       data: {

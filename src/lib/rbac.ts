@@ -1,32 +1,9 @@
 import { NextResponse } from 'next/server';
+import { verifySessionToken } from '@/lib/auth-server';
+import { DEFAULT_PROFILES } from '@/lib/users';
 import type { Role, UserProfile } from '@/types/tcg';
 
-export const DEFAULT_PROFILES: UserProfile[] = [
-  {
-    id: 'usr-thiago-admin',
-    nome: 'Thiago Couto',
-    email: 'thiago@tdkcoutstcg.com.br',
-    role: 'ADMIN',
-    pixKey: 'pix-thiago@tdkcoutstcg.com.br',
-    comissaoPct: 50,
-  },
-  {
-    id: 'usr-gabriele-partner',
-    nome: 'Gabriele Silva',
-    email: 'gabriele@tdkcoutstcg.com.br',
-    role: 'PARTNER',
-    pixKey: 'pix-gabriele@tdkcoutstcg.com.br',
-    comissaoPct: 50,
-  },
-  {
-    id: 'usr-marina-treasurer',
-    nome: 'Marina (Tesouraria)',
-    email: 'tesouraria@tdkcoutstcg.com.br',
-    role: 'TREASURER',
-    pixKey: 'tesouraria@tdkcoutstcg.com.br',
-    comissaoPct: 0,
-  },
-];
+export { DEFAULT_PROFILES };
 
 export interface AuthContext {
   userId: string;
@@ -52,23 +29,15 @@ function parseCookieHeader(cookieHeader: string | null): Record<string, string> 
 }
 
 export function extractAuthContext(request: Request): AuthContext | null {
-  const headerUserId = request.headers.get('x-tcg-user-id');
-  const headerRole = request.headers.get('x-tcg-role') as Role | null;
   const cookies = parseCookieHeader(request.headers.get('cookie'));
   const sessionRaw = cookies['tcg_session'];
+  const verifiedCookie = sessionRaw ? verifySessionToken(sessionRaw) : null;
 
-  let userId = headerUserId ?? '';
-  let role = headerRole;
+  const headerUserId = request.headers.get('x-tcg-user-id');
+  const headerRole = request.headers.get('x-tcg-role') as Role | null;
 
-  if (!userId && sessionRaw) {
-    try {
-      const parsed = JSON.parse(sessionRaw) as { userId?: string; role?: Role };
-      userId = parsed.userId ?? '';
-      role = parsed.role ?? null;
-    } catch {
-      return null;
-    }
-  }
+  const userId = verifiedCookie?.userId ?? headerUserId ?? '';
+  const role = verifiedCookie?.role ?? headerRole;
 
   if (!userId || !role) return null;
   const profile = DEFAULT_PROFILES.find((p) => p.id === userId && p.role === role);

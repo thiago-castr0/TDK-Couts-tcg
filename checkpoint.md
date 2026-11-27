@@ -1,6 +1,6 @@
 # Checkpoint do Projeto — TDK & COUTS TCG (Plataforma de Gestão de Leilões)
 
-**Última Atualização:** 27/11/2026 às 13:25 (UTC-3)  
+**Última Atualização:** 27/11/2026 às 17:55 (UTC-3)  
 **Orquestrador:** `@AgenteOrquestrador (Tech Lead)`  
 **Workspace:** `d:\Projetos\TDK-Couts-tcg-app`  
 **Repositório GitHub:** `https://github.com/thiago-castr0/TDK-Couts-tcg.git` (branch `main`)  
@@ -36,7 +36,9 @@
 
 ### C. Backend, Harness & Regras de Negócio (`@AgenteBackend`)
 - `src/lib/currency-brl.ts`: Parse e formatação BRL estrita com vírgula (`parseBRLToCentavos`, `formatCentavosToBRL`, `sanitizeBRLInput`).
-- `src/lib/rbac.ts`: Controle de acesso RBAC (`verifyRBAC`, `canEditProductDescriptions`) — bloqueia `401` sem sessão e `403` quando `TREASURER` tenta editar descrição ou valor de produtos.
+- `src/lib/users.ts` e `src/lib/auth-server.ts`: Perfis oficiais (**Thiago** `ADMIN`, **Gabrielle** `PARTNER`, **Andressa** `TREASURER`), validação de senha (`admin123` / `TCG_LOGIN_PASSWORD`) com comparação em tempo constante e cookie `HttpOnly` assinado via HMAC-SHA256 (`tcg_session`).
+- `src/components/LoginScreen.tsx`: Tela de login temática (Light/Dark Mode, marcas d'água Pokémon, seleção de usuário e campo de senha) + botão **Sair** no `HeaderBar.tsx`.
+- `src/lib/rbac.ts`: Controle de acesso RBAC (`verifyRBAC`, `canEditProductDescriptions`) — valida cookie `tcg_session` assinado ou cabeçalhos RBAC, bloqueando `401` sem sessão e `403` quando `TREASURER` tenta editar descrição ou valor de produtos.
 - `src/lib/skills/excel-skills.ts`: Geração de templates `.xlsx` e parse resiliente (`.csv`, `.xls`, `.xlsx`, limite 5 MB, Zod linha a linha com degradação graciosa para não perder linhas válidas quando outra falhar).
 - `src/lib/skills/accounting-skills.ts`: Sugestões de match De-Para por similaridade (`crossReferenceAccounting`), vínculo N:N (Lotes e Kits) e consolidado da Tesouraria (`calculateTreasuryPayouts`).
 - `src/lib/skills/bidding-skills.ts`: Regras de "Padronização de Lances TDK & COUTS TCG" baseadas no valor da Liga Pokémon.
@@ -60,11 +62,11 @@
   - `src/components/CustomersLabelsTab.tsx` (Resumo WhatsApp + Folha A4 com 10 Etiquetas TDK & COUTS TCG)
   - `src/components/TreasuryTab.tsx`
 
-### E. Qualidade e Testes Validados (`@AgenteQA` — 21/11/2026)
-- `npm run qa:design` (`scripts/enforce-design-system.mjs`): **Passou** — 33 arquivos validados, 100% das funções `<= 100` linhas, `verifyRBAC` em 100% das rotas, Tailwind CSS + Lucide estritos.
+### E. Qualidade e Testes Validados (`@AgenteQA` — 27/11/2026)
+- `npm run qa:design` (`scripts/enforce-design-system.mjs`): **Passou** — 36 arquivos validados, 100% das funções `<= 100` linhas, `verifyRBAC` em 100% das rotas, Tailwind CSS + Lucide estritos.
 - `npx tsc --noEmit`: **Passou** (exit code 0).
 - `npm run build`: **Passou** (Next.js 15.5.29, 13 rotas compiladas).
-- `npx playwright test` (`tests/e2e.spec.ts`): **6 passed (5.9s)** no Chromium real com hidratação cold-start ativa do Supabase (Dashboard `R$ 4.123,76`, filtros/cadastro `30,50`, upload resiliente com gravação real no bucket `tcg-uploads` e `tcg_upload_logs`, conciliação De-Para em `tcg_reconciliations`, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
+- `npx playwright test` (`tests/e2e.spec.ts`): **7 passed (8.6s)** no Chromium real (incluindo tela de login com senha `admin123` para Thiago, Gabrielle e Andressa, persistência de sessão, logout, Dashboard `R$ 4.123,76`, upload resiliente com timeout seguro de 3,5s, conciliação De-Para, WhatsApp + 10 etiquetas, e segurança RBAC `401`/`403`).
 - Bancos local e remoto higienizados após os testes (`node scripts/seed-db.mjs` + verificação Supabase -> 343 compras = `412376` centavos / `R$ 4.123,76`).
 
 ---

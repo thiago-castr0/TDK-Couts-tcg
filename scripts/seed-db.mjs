@@ -49,9 +49,9 @@ function run() {
   const matrix = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
 
   const profiles = [
-    { id: 'usr-thiago-admin', nome: 'Thiago Couto', email: 'thiago@tdkcoutstcg.com.br', role: 'ADMIN', pixKey: 'pix-thiago@tdkcoutstcg.com.br', comissaoPct: 50 },
-    { id: 'usr-gabriele-partner', nome: 'Gabriele Silva', email: 'gabriele@tdkcoutstcg.com.br', role: 'PARTNER', pixKey: 'pix-gabriele@tdkcoutstcg.com.br', comissaoPct: 50 },
-    { id: 'usr-marina-treasurer', nome: 'Marina (Tesouraria)', email: 'tesouraria@tdkcoutstcg.com.br', role: 'TREASURER', pixKey: 'tesouraria@tdkcoutstcg.com.br', comissaoPct: 0 },
+    { id: 'usr-thiago-admin', nome: 'Thiago', email: 'thiago@tdkcoutstcg.com.br', role: 'ADMIN', pixKey: 'pix-thiago@tdkcoutstcg.com.br', comissaoPct: 50 },
+    { id: 'usr-gabriele-partner', nome: 'Gabrielle', email: 'gabrielle@tdkcoutstcg.com.br', role: 'PARTNER', pixKey: 'pix-gabrielle@tdkcoutstcg.com.br', comissaoPct: 50 },
+    { id: 'usr-andressa-treasurer', nome: 'Andressa', email: 'andressa@tdkcoutstcg.com.br', role: 'TREASURER', pixKey: 'pix-andressa@tdkcoutstcg.com.br', comissaoPct: 0 },
   ];
 
   const purchases = [];
@@ -95,8 +95,8 @@ function run() {
   ];
 
   const auctions = [
-    { id: 'auc-014', nomeLeilao: 'Leilão #14 - Especial Kanto & ARs', responsavelId: 'usr-thiago-admin', responsavelNome: 'Thiago Couto', dataLeilao: '2026-11-14', totalEsperadoCentavos: 22000, totalArrematadoCentavos: 23500, statusRepasse: 'Em Conferencia', createdAt: '2026-11-14T20:00:00.000Z' },
-    { id: 'auc-015', nomeLeilao: 'Leilão #15 - Sexta Poké & Kits', responsavelId: 'usr-gabriele-partner', responsavelNome: 'Gabriele Silva', dataLeilao: '2026-11-17', totalEsperadoCentavos: 18000, totalArrematadoCentavos: 17100, statusRepasse: 'Pendente', createdAt: '2026-11-17T20:00:00.000Z' },
+    { id: 'auc-014', nomeLeilao: 'Leilão #14 - Especial Kanto & ARs', responsavelId: 'usr-thiago-admin', responsavelNome: 'Thiago', dataLeilao: '2026-11-14', totalEsperadoCentavos: 22000, totalArrematadoCentavos: 23500, statusRepasse: 'Em Conferencia', createdAt: '2026-11-14T20:00:00.000Z' },
+    { id: 'auc-015', nomeLeilao: 'Leilão #15 - Sexta Poké & Kits', responsavelId: 'usr-gabriele-partner', responsavelNome: 'Gabrielle', dataLeilao: '2026-11-17', totalEsperadoCentavos: 18000, totalArrematadoCentavos: 17100, statusRepasse: 'Pendente', createdAt: '2026-11-17T20:00:00.000Z' },
   ];
 
   const sales = [

@@ -21,6 +21,10 @@ export interface SpreadsheetUploadAuditParams {
   errorsJson: unknown;
 }
 
+function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  return fetch(input, { ...init, signal: AbortSignal.timeout(3500) });
+}
+
 /**
  * Cria cliente Supabase server-side usando Service Role ou ponte com TCG_BACKEND_SECRET.
  */
@@ -29,14 +33,20 @@ export function getSupabaseAdminClient(): SupabaseClient | null {
   if (!url) return null;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (serviceKey) {
-    return createClient(url, serviceKey, { auth: { persistSession: false } });
+    return createClient(url, serviceKey, {
+      auth: { persistSession: false },
+      global: { fetch: fetchWithTimeout },
+    });
   }
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const backendSecret = process.env.TCG_BACKEND_SECRET;
   if (!anonKey || !backendSecret) return null;
   return createClient(url, anonKey, {
     auth: { persistSession: false },
-    global: { headers: { 'x-tcg-backend-secret': backendSecret } },
+    global: {
+      headers: { 'x-tcg-backend-secret': backendSecret },
+      fetch: fetchWithTimeout,
+    },
   });
 }
 
